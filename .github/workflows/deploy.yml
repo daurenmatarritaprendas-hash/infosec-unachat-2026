@@ -28,9 +28,6 @@ jobs:
       - name: Ejecutar pruebas unitarias
         run: npm test
 
-      - name: Prueba fallida intencional
-        run: exit 1  
-
       - name: Ejecutar pruebas de integración
         run: npm run test:integration
 
