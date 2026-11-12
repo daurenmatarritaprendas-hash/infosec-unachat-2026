@@ -1,5 +1,5 @@
 
-name: Desplegar chat en Render
+name: Probar y desplegar chat en Render
 
 on:
   push:
@@ -9,13 +9,38 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  pruebas:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Solicitar despliegue
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Ejecutar pruebas unitarias
+        run: npm test
+
+      - name: Ejecutar pruebas de integración
+        run: npm run test:integration
+
+  deploy:
+    needs: pruebas
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Solicitar despliegue en Render
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
           curl --fail --silent --show-error --output /dev/null \
             --get --data-urlencode "ref=${GITHUB_SHA}" \
             "$RENDER_DEPLOY_HOOK_URL"
+
